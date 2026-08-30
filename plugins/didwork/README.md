@@ -12,12 +12,17 @@ DidWork receives a claim (`type` + `expected`), gathers evidence from the author
 | Hook | `hooks/hooks.json` | Injects the verify-outcomes rule at session start |
 | Skill | `skills/verify-outcomes/SKILL.md` | Claim types and the verify → gate workflow |
 | Command | `commands/verify.md` | `/didwork:verify` a claimed outcome on demand |
+| Command | `commands/setup.md` | `/didwork:setup` — guided first run: prove the connection, detect the stack, backfill verdicts |
 | Agent | `agents/outcome-verifier.md` | Subagent that verifies one claim and reports the verdict |
+
+## First run
+
+After installing, run `/didwork:setup`. It verifies the MCP connection end-to-end, detects which of your project's systems DidWork can verify, recommends the providers worth connecting, and backfills verdicts on your recent merged PRs and CI runs — so the verification log starts populated with your own work.
 
 ## Requirements
 
 - Node.js (for `npx`)
-- `DIDWORK_API_KEY` environment variable — get one at [didwork.sh/console](https://didwork.sh/console). `http.ok` claims work without a key.
+- `DIDWORK_API_KEY` environment variable — get one at [didwork.sh/console](https://didwork.sh/console). Without it the server runs keyless: `http.ok` claims still verify (rate limited, not stored), and every other tool answers with how to unlock itself.
 
 ## Supported claim types
 

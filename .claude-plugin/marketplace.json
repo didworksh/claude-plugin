@@ -1,0 +1,18 @@
+{
+  "name": "didwork",
+  "owner": {
+    "name": "DidWork",
+    "email": "hello@didwork.sh"
+  },
+  "metadata": {
+    "description": "DidWork plugins for Claude Code — independently verify that the outcomes your software claims are actually true.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "didwork",
+      "source": "./plugins/didwork",
+      "description": "Your agent said it's done. Did it work? Independent verification that outcomes actually happened — verdicts your agent can gate on, not self-grading."
+    }
+  ]
+}

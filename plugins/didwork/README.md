@@ -9,7 +9,8 @@ DidWork receives a claim (`type` + `expected`), gathers evidence from the author
 | Piece | Path | Purpose |
 | --- | --- | --- |
 | MCP config | `.mcp.json` | Runs `npx -y @didwork/mcp` with your `DIDWORK_API_KEY` |
-| Hook | `hooks/hooks.json` | Injects the verify-outcomes rule at session start |
+| Hook | `hooks/verify-outcomes-rule.sh` | Injects the verify-outcomes rule at session start |
+| Hook | `hooks/stop-verify-gate.mjs` | Stop gate: blocks ending the turn with unverified external outcomes |
 | Skill | `skills/verify-outcomes/SKILL.md` | Claim types and the verify → gate workflow |
 | Command | `commands/verify.md` | `/didwork:verify` a claimed outcome on demand |
 | Command | `commands/setup.md` | `/didwork:setup` — guided first run: prove the connection, detect the stack, backfill verdicts |
@@ -18,6 +19,12 @@ DidWork receives a claim (`type` + `expected`), gathers evidence from the author
 ## First run
 
 After installing, run `/didwork:setup`. It verifies the MCP connection end-to-end, detects which of your project's systems DidWork can verify, recommends the providers worth connecting, and backfills verdicts on your recent merged PRs and CI runs — so the verification log starts populated with your own work.
+
+## Enforcement: the Stop gate
+
+The session-start rule asks the agent to verify; the Stop gate makes sure it did. When the agent tries to end its turn after running commands whose outcomes live in external systems — `git push`, `gh pr merge`, `npm publish`, deploys (`wrangler`, `vercel`, `fly`, `terraform apply`, …), Stripe CLI mutations, mutating `curl` calls to remote hosts — with no DidWork verification afterward, the stop is blocked once and the agent is told exactly what to verify and with which claim types. A `did_verify` / `did_get` / `did_watch` call (or a keyless `curl` to `api.didwork.sh/v1/verify`) after the last side effect satisfies the gate.
+
+The gate never loops (a stop forced by the gate itself always passes), fails open on any error, and ignores commands targeting localhost. Disable it with `DIDWORK_STOP_GATE=off` in your environment.
 
 ## Requirements
 

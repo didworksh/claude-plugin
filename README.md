@@ -23,6 +23,7 @@ curl -s https://api.didwork.sh/v1/verify \
 
 - **MCP server** — `did_verify`, `did_get`, `did_list`, `did_watch`, `did_watches`, `did_unwatch`, `did_usage`, provided by the published [`@didwork/mcp`](https://www.npmjs.com/package/@didwork/mcp) package (run via `npx`, nothing vendored here).
 - **Hook** (`SessionStart`) — injects the verify-outcomes rule at session start: verify external side effects before reporting success.
+- **Hook** (`Stop`) — the enforcement gate: the agent cannot end its turn after pushes, merges, publishes, deploys, Stripe mutations, or mutating remote `curl` calls unless a DidWork verification followed them. Blocks once with the exact claims to run; never loops, fails open, ignores localhost. Opt out with `DIDWORK_STOP_GATE=off`.
 - **Skill** (`verify-outcomes`) — the full workflow and claim-type reference, loaded when the agent is about to report on a side-effectful action.
 - **Command** (`/didwork:verify`) — verify a claimed outcome on demand.
 - **Agent** (`outcome-verifier`) — a subagent that verifies one claim and returns the verdict with evidence.

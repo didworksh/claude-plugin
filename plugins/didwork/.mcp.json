@@ -7,7 +7,7 @@
         "@didwork/mcp@0.0.8"
       ],
       "env": {
-        "DIDWORK_API_KEY": "${DIDWORK_API_KEY:-}"
+        "DIDWORK_API_KEY": "${DIDWORK_API_KEY}"
       }
     }
   }

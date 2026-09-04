@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "DidWork plugins for Claude Code — independently verify that the outcomes your software claims are actually true.",
-    "version": "0.3.2"
+    "version": "0.3.3"
   },
   "plugins": [
     {

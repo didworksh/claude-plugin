@@ -8,7 +8,7 @@ DidWork receives a claim (`type` + `expected`), gathers evidence from the author
 
 | Piece | Path | Purpose |
 | --- | --- | --- |
-| MCP config | `.mcp.json` | Runs `npx -y @didwork/mcp` with your `DIDWORK_API_KEY` |
+| MCP config | `.mcp.json` | Runs `npx -y -p @didwork/mcp -p @didwork/inspect didwork-mcp` with your `DIDWORK_API_KEY` |
 | Hook | `hooks/verify-outcomes-rule.sh` | Injects the verify-outcomes rule at session start |
 | Hook | `hooks/stop-verify-gate.mjs` | Stop gate: blocks ending the turn with unverified external outcomes |
 | Skill | `skills/verify-outcomes/SKILL.md` | Claim types and the verify → gate workflow |
@@ -25,6 +25,10 @@ After installing, run `/didwork:setup`. It verifies the MCP connection end-to-en
 The session-start rule asks the agent to verify; the Stop gate makes sure it did. When the agent tries to end its turn after running commands whose outcomes live in external systems — `git push`, `gh pr merge`, `npm publish`, deploys (`wrangler`, `vercel`, `fly`, `terraform apply`, …), Stripe CLI mutations, mutating `curl` calls to remote hosts — with no DidWork verification afterward, the stop is blocked once and the agent is told exactly what to verify and with which claim types. A `did_verify` / `did_get` / `did_watch` call (or a keyless `curl` to `api.didwork.sh/v1/verify`) after the last side effect satisfies the gate.
 
 The gate never loops (a stop forced by the gate itself always passes), fails open on any error, ignores commands targeting localhost, and ignores heredoc bodies — a fixture or doc written with `cat > file <<'EOF'` that mentions `npm publish` is data, not a publish. Disable it with `DIDWORK_STOP_GATE=off` in your environment.
+
+## Capability Trust
+
+The MCP server also exposes `did_inspect_tool`: before an agent calls a tool with real-world consequences, it can ask what that tool can actually affect. DidWork statically analyses the MCP tool handlers and `did.tool()` declarations in the project and returns, per tool, the evidenced capabilities (`financial.refund`, `communication.external`, `data.delete`, …) with `file:line` evidence, a risk level, a separate confidence level, and whether the implementation exceeds what the tool declares. `unknown` means "not shown to be safe", never "low risk". Analysis runs locally and reads source only; no key is needed and nothing is uploaded. The analyzer is [`@didwork/inspect`](https://www.npmjs.com/package/@didwork/inspect), installed alongside the server by the `.mcp.json` command; the same analysis is available as `npx @didwork/inspect inspect`.
 
 ## Requirements
 

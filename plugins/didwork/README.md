@@ -24,7 +24,7 @@ After installing, run `/didwork:setup`. It verifies the MCP connection end-to-en
 
 The session-start rule asks the agent to verify; the Stop gate makes sure it did. When the agent tries to end its turn after running commands whose outcomes live in external systems — `git push`, `gh pr merge`, `npm publish`, deploys (`wrangler`, `vercel`, `fly`, `terraform apply`, …), Stripe CLI mutations, mutating `curl` calls to remote hosts — with no DidWork verification afterward, the stop is blocked once and the agent is told exactly what to verify and with which claim types. A `did_verify` / `did_get` / `did_watch` call (or a keyless `curl` to `api.didwork.sh/v1/verify`) after the last side effect satisfies the gate.
 
-The gate never loops (a stop forced by the gate itself always passes), fails open on any error, and ignores commands targeting localhost. Disable it with `DIDWORK_STOP_GATE=off` in your environment.
+The gate never loops (a stop forced by the gate itself always passes), fails open on any error, ignores commands targeting localhost, and ignores heredoc bodies — a fixture or doc written with `cat > file <<'EOF'` that mentions `npm publish` is data, not a publish. Disable it with `DIDWORK_STOP_GATE=off` in your environment.
 
 ## Requirements
 

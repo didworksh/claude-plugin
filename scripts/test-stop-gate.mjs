@@ -127,6 +127,64 @@ run("npm publish blocks", {
   reasonHas: ["registry"],
 });
 
+run("deploy keywords inside a heredoc body are data, not a deploy", {
+  lines: [
+    bash(
+      [
+        "mkdir -p test/fixtures && cat > test/fixtures/ops.ts <<'EOF'",
+        "server.registerTool(\"deploy\", {}, async () => {",
+        "  execSync(\"vercel --prod\");",
+        "  execSync(\"npm publish --access public\");",
+        "  execSync(\"git push origin main\");",
+        "});",
+        "EOF",
+        "npm test",
+      ].join("\n"),
+    ),
+    text("Fixtures written."),
+  ],
+  expectBlock: false,
+});
+
+run("a real deploy after a heredoc still blocks", {
+  lines: [
+    bash(["cat > notes.md <<EOF", "Deploy with: wrangler deploy", "EOF", "npx wrangler deploy"].join("\n")),
+  ],
+  expectBlock: true,
+  reasonHas: ["wrangler deploy"],
+});
+
+run("the heredoc operator line itself is still matched", {
+  lines: [bash(["git push origin main && cat <<EOF", "done", "EOF"].join("\n"))],
+  expectBlock: true,
+  reasonHas: ["git push origin main"],
+});
+
+run("several heredocs on one line skip both bodies in order", {
+  lines: [
+    bash(
+      ["cat <<A > a.txt; cat <<\"B\" > b.txt", "npm publish", "A", "vercel --prod", "B", "echo ok"].join("\n"),
+    ),
+  ],
+  expectBlock: false,
+});
+
+run("<<- allows an indented terminator", {
+  lines: [bash(["cat <<-EOF", "\tterraform apply", "\tEOF", "ls"].join("\n"))],
+  expectBlock: false,
+});
+
+run("an unterminated heredoc swallows the rest", {
+  lines: [bash(["cat <<'EOF'", "fly deploy", "npm publish"].join("\n"))],
+  expectBlock: false,
+});
+
+run("a here-string is not a heredoc", {
+  lines: [bash("grep -c x <<< \"hello\"; git push origin main")],
+  expectBlock: true,
+  reasonHas: ["git push origin main"],
+});
+
 // Missing transcript: gate must allow.
 {
   const payload = JSON.stringify({

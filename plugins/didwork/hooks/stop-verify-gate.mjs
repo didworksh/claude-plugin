@@ -52,6 +52,37 @@ const SIDE_EFFECTS = [
   },
 ];
 
+/**
+ * Drop heredoc bodies from a shell command before matching. Text written to a
+ * file with `cat > fixture.ts <<'EOF' … EOF` is data, not a command that ran:
+ * a fixture or doc that mentions `npm publish` or `vercel --prod` is not a
+ * publish or a deploy. The operator line itself is kept (its command part
+ * could still be a side effect); only the lines between it and the terminator
+ * go. Handles several heredocs on one line (bodies follow in order), quoted
+ * and unquoted tags, `<<-` with an indented terminator, and an unterminated
+ * heredoc (everything after it is body). `<<<` here-strings are left alone.
+ */
+const HEREDOC_OPERATOR = /<<(?!<)(-?)\s*(?:'([^']+)'|"([^"]+)"|\\?([A-Za-z_][\w-]*))/g;
+
+export function stripHeredocs(command) {
+  if (!command.includes("<<")) return command;
+  const out = [];
+  const pending = []; // [{ tag, dash }] terminators still expected, in order
+  for (const line of command.split("\n")) {
+    if (pending.length > 0) {
+      const { tag, dash } = pending[0];
+      const candidate = dash ? line.replace(/^\t+/, "") : line;
+      if (candidate === tag) pending.shift();
+      continue; // body or terminator: never matched
+    }
+    out.push(line);
+    for (const m of line.matchAll(HEREDOC_OPERATOR)) {
+      pending.push({ tag: m[2] ?? m[3] ?? m[4], dash: m[1] === "-" });
+    }
+  }
+  return out.join("\n");
+}
+
 const VERIFICATION_TOOL = /didwork.*did_(verify|get|watch)$/;
 const VERIFICATION_CURL = /api\.didwork\.sh\/v1\/verify/;
 
@@ -88,8 +119,9 @@ export function scanTranscript(lines) {
         continue;
       }
       if (name !== "Bash") continue;
-      const command = typeof use.input?.command === "string" ? use.input.command : "";
-      if (!command) continue;
+      const raw = typeof use.input?.command === "string" ? use.input.command : "";
+      if (!raw) continue;
+      const command = stripHeredocs(raw);
       if (VERIFICATION_CURL.test(command)) {
         lastVerification = index;
         continue;

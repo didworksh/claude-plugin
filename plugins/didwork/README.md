@@ -12,13 +12,14 @@ DidWork receives a claim (`type` + `expected`), gathers evidence from the author
 | Hook | `hooks/verify-outcomes-rule.sh` | Injects the verify-outcomes rule at session start |
 | Hook | `hooks/stop-verify-gate.mjs` | Stop gate: blocks ending the turn with unverified external outcomes |
 | Skill | `skills/verify-outcomes/SKILL.md` | Claim types and the verify → gate workflow |
+| Command | `commands/demo.md` | `/didwork:demo` — see a false claim get caught, in under a minute, with no key |
 | Command | `commands/verify.md` | `/didwork:verify` a claimed outcome on demand |
 | Command | `commands/setup.md` | `/didwork:setup` — guided first run: prove the connection, detect the stack, backfill verdicts |
 | Agent | `agents/outcome-verifier.md` | Subagent that verifies one claim and reports the verdict |
 
 ## First run
 
-After installing, run `/didwork:setup`. It verifies the MCP connection end-to-end, detects which of your project's systems DidWork can verify, recommends the providers worth connecting, and backfills verdicts on your recent merged PRs and CI runs — so the verification log starts populated with your own work.
+After installing, run `/didwork:demo` to watch DidWork catch a deploy that reported success against a service that never came up — thirty seconds, no key, nothing touched in your project. Then run `/didwork:setup`. It verifies the MCP connection end-to-end, detects which of your project's systems DidWork can verify, recommends the providers worth connecting, and backfills verdicts on your recent merged PRs and CI runs — so the verification log starts populated with your own work.
 
 ## Enforcement: the Stop gate
 
